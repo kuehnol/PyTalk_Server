@@ -3,12 +3,8 @@
         "username": "joe",
         "pw_hash": "085294bc9669dc8d9591758b9caeccdd8127c9d6aac8d81bb55cddbf6fc01005f38332128ea682e92983cb7c3f033705a32295afa868a3cf989b4494aabc8fc2"
     },
-    "ala": {
-        "username": "ala",
-        "pw_hash": "816808ad557e7bf626e4bfa14a806bc81a1cac2db621a0ad9c171d713014566468e9ebb79e18f9897ec2ab323f6e54f0b3a2895aa40a367a73c0d8be83f5df7e"
-    },
-    "hola": {
-        "username": "hola",
-        "pw_hash": "42a46be94ae2242bdc13620cb065e64391059b8f909e27208293f462f3dd51669811446b3f8227c72bf6a1cf2628584429578b5d41756fbd02b40b45bfae8faf"
+    "cooleruser123": {
+        "username": "cooleruser123",
+        "pw_hash": "003bc9a5d710eb3e6ff7e84b74943318ab667d4aaf854123450e6eef46ce913715bd99a760e3643024ea295d2ddbb59a295bf1c3c2e9bb7f53bc0df53d65faea"
     }
 }

@@ -15,6 +15,9 @@ class Server:
 
         username = client_socket.recv(1024).decode("utf-8")
         pw_hash = client_socket.recv(1024).decode("utf-8")
+        
+        if username == "" or pw_hash == "":
+            return
 
         auth = db.check_credentials(username, pw_hash)
         if auth == True:
@@ -65,7 +68,7 @@ class Server:
 
         # client arr which contains every client for message broadcasting in client_handler()
         clients = []
-
+        
         while True:
             try:
                 # if socket accepts client, value for client and addr gets returned by server.accept()
@@ -82,11 +85,14 @@ class Server:
 
             except KeyboardInterrupt:
                 self.__out.printout("Closing connection..")
+                
+                # close all client connections
+                for c in clients:
+                    print("closed client")
+                    c.close()
+                
+                #close server socket
+                server.close()
+                print("closed server socket")
+                exit()
                 break
-
-        # close all remaining connections
-        for c in clients:
-            client.close()  # doesnt work yet, maybe client issue
-
-        # close server socket
-        server.close()
