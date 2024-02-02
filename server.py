@@ -11,18 +11,24 @@ class Server:
         self.__out = Output()
 
     def __auth_client(self, client_socket):
+        # create db object
         db = JSON_db()
 
+        # get username and password hash from client
         username = client_socket.recv(1024).decode("utf-8")
         pw_hash = client_socket.recv(1024).decode("utf-8")
         
+        # check if empty
         if username == "" or pw_hash == "":
             return
 
+        # TODO: do something about spaces as last username char
+        # check if user logs in with correct credentials
         auth = db.check_credentials(username, pw_hash)
         if auth == True:
             self.__out.printout(f'"{username}" logged in')
             client_socket.send("OK".encode("utf-8"))
+        # else create an account, TODO: check for username already existing before creating account
         else:
             db.add_user(username, pw_hash)
             self.__out.printout(f'New user "{username}" created.')
@@ -59,6 +65,7 @@ class Server:
     def start(self):
         # create socket object, AF_INET: IPv4, SOCK_STREAM: TCP
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # bind listener to port on all available network interfaces
         server.bind(("0.0.0.0", self.__port))
         # start listener, set max connections to accept
@@ -69,11 +76,12 @@ class Server:
         # client arr which contains every client for message broadcasting in client_handler()
         clients = []
         
-        while True:
-            try:
+        try:
+            while True:
                 # if socket accepts client, value for client and addr gets returned by server.accept()
                 client, addr = server.accept()
-                self.__out.printout(f"New connection: {addr}")
+                self.__out.printout(f"Accepted incoming connection from {addr[0]}:{addr[1]}")
+                
                 # append client to clients list
                 clients.append(client)
 
@@ -81,18 +89,13 @@ class Server:
                 client_handler = threading.Thread(
                     target=self.__handle_client, args=(client, clients)
                 )
+                client_handler.daemon = True
                 client_handler.start()
-
-            except KeyboardInterrupt:
-                self.__out.printout("Closing connection..")
                 
-                # close all client connections
-                for c in clients:
-                    print("closed client")
-                    c.close()
-                
-                #close server socket
-                server.close()
-                print("closed server socket")
-                exit()
-                break
+        # stop server properly on ^C, close connections
+        except KeyboardInterrupt:
+            self.__out.printout("Closing connection...")
+        finally:
+            for c in clients:
+                c.close()
+            server.close()
