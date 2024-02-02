@@ -1,5 +1,6 @@
 import socket
 import threading
+import time # TODO: remove later
 from terminal_out import Output
 from db import JSON_db
 
@@ -13,7 +14,7 @@ class Server:
     def __auth_client(self, client_socket):
         # create db object
         db = JSON_db()
-
+        
         # get username and password hash from client
         username = client_socket.recv(1024).decode("utf-8")
         pw_hash = client_socket.recv(1024).decode("utf-8")
@@ -33,21 +34,23 @@ class Server:
             db.add_user(username, pw_hash)
             self.__out.printout(f'New user "{username}" created.')
             client_socket.send("OK".encode("utf-8"))
+        return username
 
     def __handle_client(self, client_socket, clients):
-        self.__auth_client(client_socket)
-        while True:
+        username = self.__auth_client(client_socket)
+        client_active = True
+        while client_active:
             try:
                 # receive msg, max 1024 bytes with utf-8 encoding (approx. 1000 chars)
-                msg = client_socket.recv(1024).decode("utf-8")
+                msg = f'{username}: {client_socket.recv(1024).decode("utf-8")}'
                 # if msg empty, break loop
-                if not msg:
+                if msg == "":
                     break
 
                 self.__out.printout(
                     f"Message received, sending to {len(clients) - 1} clients"
                 )
-
+                
                 # broadcast to all other clients
                 for c in clients:
                     # if client is not the client that sent the message
@@ -57,10 +60,10 @@ class Server:
             # if client resets connection, break
             except ConnectionResetError:
                 break
-
-        # close connection to client and remove client from client list
-        client_socket.close()
-        clients.remove(client_socket)
+            
+            # close connection to client and remove client from client list
+            clients.remove(client_socket)
+            client_socket.close()
 
     def start(self):
         # create socket object, AF_INET: IPv4, SOCK_STREAM: TCP
