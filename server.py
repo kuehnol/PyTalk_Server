@@ -1,6 +1,6 @@
 import socket
 import threading
-import time # TODO: remove later
+import time  # TODO: remove later
 from terminal_out import Output
 from db import JSON_db
 
@@ -14,11 +14,11 @@ class Server:
     def __auth_client(self, client_socket):
         # create db object
         db = JSON_db()
-        
+
         # get username and password hash from client
         username = client_socket.recv(1024).decode("utf-8")
         pw_hash = client_socket.recv(1024).decode("utf-8")
-        
+
         # check if empty
         if username == "" or pw_hash == "":
             return
@@ -38,11 +38,10 @@ class Server:
 
     def __handle_client(self, client_socket, clients):
         username = self.__auth_client(client_socket)
-        client_active = True
-        while client_active:
+        while True:
             try:
                 # receive msg, max 1024 bytes with utf-8 encoding (approx. 1000 chars)
-                msg = f'{username}: {client_socket.recv(1024).decode("utf-8")}'
+                msg = client_socket.recv(1024).decode("utf-8")
                 # if msg empty, break loop
                 if msg == "":
                     break
@@ -50,20 +49,22 @@ class Server:
                 self.__out.printout(
                     f"Message received, sending to {len(clients) - 1} clients"
                 )
-                
+
                 # broadcast to all other clients
                 for c in clients:
                     # if client is not the client that sent the message
                     if c != client_socket:
-                        c.send(msg.encode("utf-8"))
+                        c.send(f"{username}: {msg}".encode("utf-8"))
 
             # if client resets connection, break
             except ConnectionResetError:
+                self.__out.printout(f"User {username} reset connection")
+                # close connection to client and exit loop
+                client_socket.close()
                 break
+        # remove client from client list
+        clients.remove(client_socket)
             
-            # close connection to client and remove client from client list
-            clients.remove(client_socket)
-            client_socket.close()
 
     def start(self):
         # create socket object, AF_INET: IPv4, SOCK_STREAM: TCP
@@ -78,13 +79,15 @@ class Server:
 
         # client arr which contains every client for message broadcasting in client_handler()
         clients = []
-        
+
         try:
             while True:
                 # if socket accepts client, value for client and addr gets returned by server.accept()
                 client, addr = server.accept()
-                self.__out.printout(f"Accepted incoming connection from {addr[0]}:{addr[1]}")
-                
+                self.__out.printout(
+                    f"Accepted incoming connection from {addr[0]}:{addr[1]}"
+                )
+
                 # append client to clients list
                 clients.append(client)
 
@@ -94,7 +97,7 @@ class Server:
                 )
                 client_handler.daemon = True
                 client_handler.start()
-                
+
         # stop server properly on ^C, close connections
         except KeyboardInterrupt:
             self.__out.printout("Closing connection...")

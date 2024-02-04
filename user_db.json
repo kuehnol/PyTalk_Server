@@ -6,5 +6,13 @@
     "cooleruser123": {
         "username": "cooleruser123",
         "pw_hash": "003bc9a5d710eb3e6ff7e84b74943318ab667d4aaf854123450e6eef46ce913715bd99a760e3643024ea295d2ddbb59a295bf1c3c2e9bb7f53bc0df53d65faea"
+    },
+    "lol": {
+        "username": "lol",
+        "pw_hash": "003bc9a5d710eb3e6ff7e84b74943318ab667d4aaf854123450e6eef46ce913715bd99a760e3643024ea295d2ddbb59a295bf1c3c2e9bb7f53bc0df53d65faea"
+    },
+    "rofler": {
+        "username": "rofler",
+        "pw_hash": "55658926d0d1a08d92d007163282ccaf68552abddc0c8b82e9aae8905d17e7cb413d022f1b0fd3d10827251ca103a757363996d9b0beb48f38d0ac4be124f992"
     }
 }
