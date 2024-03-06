@@ -1,10 +1,7 @@
 from datetime import datetime
 
-
-class Output:
-    def __init__(self):  # placeholder or sth idk
-        pass
-
+# TODO: replace with logging or sth
+class Output():
     def printout(self, text):
         # get current time
         curr_time = datetime.now()

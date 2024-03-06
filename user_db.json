@@ -3,16 +3,20 @@
         "username": "joe",
         "pw_hash": "085294bc9669dc8d9591758b9caeccdd8127c9d6aac8d81bb55cddbf6fc01005f38332128ea682e92983cb7c3f033705a32295afa868a3cf989b4494aabc8fc2"
     },
-    "cooleruser123": {
-        "username": "cooleruser123",
-        "pw_hash": "003bc9a5d710eb3e6ff7e84b74943318ab667d4aaf854123450e6eef46ce913715bd99a760e3643024ea295d2ddbb59a295bf1c3c2e9bb7f53bc0df53d65faea"
+    "h\u00f6lle": {
+        "username": "h\u00f6lle",
+        "pw_hash": "63718b07a55bfe5188e34202c86ae24b18f2f0bf9028cab905d4af9e520ee83da7167dc32a98f68cf4d4e04983b44fa79ab0fabaeb5f9f9b7e2d7f3e82f902e3"
     },
-    "lol": {
-        "username": "lol",
-        "pw_hash": "003bc9a5d710eb3e6ff7e84b74943318ab667d4aaf854123450e6eef46ce913715bd99a760e3643024ea295d2ddbb59a295bf1c3c2e9bb7f53bc0df53d65faea"
+    "d": {
+        "username": "d",
+        "pw_hash": "4668897682ccd2b1ee0cae8dc55947291f819cc59ee126f5bd243b1852577414413aeed5780b5fb11090038715beed1b00714a15b31c8d9674fbdbdf7fd4191c"
     },
-    "rofler": {
-        "username": "rofler",
-        "pw_hash": "55658926d0d1a08d92d007163282ccaf68552abddc0c8b82e9aae8905d17e7cb413d022f1b0fd3d10827251ca103a757363996d9b0beb48f38d0ac4be124f992"
+    "dd": {
+        "username": "dd",
+        "pw_hash": "3af3f850c01c8dc41284ed83e487862d8a842e593d7c3cd2378da72ac74055acacb50948c15cbefd50740431355a30110e6a17143cf2a8650012c68813542331"
+    },
+    "klsdjf": {
+        "username": "klsdjf",
+        "pw_hash": "88c4374144d17692807da38d3553aecff6b82905c9f84379f4ddcdce5732e1be63b100cdf0a7addbcf30bb632fa7eb5f4873fa9e2133fe3c5291245503195c1d"
     }
 }

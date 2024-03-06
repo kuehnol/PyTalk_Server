@@ -1,42 +1,59 @@
 import json
 
 
-class JSON_db:
+class User_DB():
     def __init__(self):
         self.__json_file = "user_db.json"
 
-    def __read_db(self):
+    def __read_db(self) -> dict:
+        """
+        Opens and reads json user database.
+
+        :return: Returns db contents.
+        """
         # open json db and load contents into user_db
-        with open(self.__json_file, "r") as json_db:
-            user_db = json.load(json_db)
-            
-        json_db.close()
+        with open(self.__json_file, "r") as db_file:
+            user_db = json.load(db_file)
+
         return user_db
 
-    def add_user(self, new_username, new_pw_hash):
-        # get db data
+    def add_user(self, new_username: str, new_pw_hash: str) -> None:
+        """
+        Writes a new user to the database.
+
+        :param new_username: Username to be written.
+        :param new_password_hash: Password hash to be written.
+        """
         user_db = self.__read_db()
-        
-        # create user entry in json format
         new_user = {"username": new_username, "pw_hash": new_pw_hash}
-        # add to user_db
         user_db[new_username] = new_user
 
         # write changes to file
-        with open(self.__json_file, "w") as json_db:
-            json.dump(user_db, json_db, indent=4)
-            
-        json_db.close()
+        with open(self.__json_file, "w") as db_file:
+            json.dump(user_db, db_file, indent=4)
 
-    def check_credentials(self, username, pw_hash_attempt):
-        # set authentication status to false
-        auth = False
-        
-        # get db data
+    def user_exists(self, username: str) -> bool:
+        """
+        Checks if username is in db.
+
+        :param username: The username to be checked.
+        :return: Username exists or does not exist
+        """
         user_db = self.__read_db()
 
-        # if username in db, return true, else it stays at false
-        if username in user_db: # to remove, maybe, idk?
-            if user_db[username]["pw_hash"] == pw_hash_attempt:
-                auth = True
-        return auth
+        return username in user_db
+
+    def check_credentials(self, username: str, pw_hash_attempt: str) -> bool:
+        """
+        Checks username and password hash against db.
+
+        :param username: The username to be checked.
+        :param pw_hash_attempt: The password hash to be checked.
+        :return: Auth successful or unsuccessful
+        """
+        user_db = self.__read_db()
+
+        if not self.user_exists(username):
+            return False
+        
+        return user_db[username]["pw_hash"] == pw_hash_attempt
