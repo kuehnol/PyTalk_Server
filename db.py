@@ -1,7 +1,7 @@
 import json
 
 
-class User_DB():
+class UserDB:
     def __init__(self):
         self.__json_file = "user_db.json"
 
@@ -22,7 +22,7 @@ class User_DB():
         Writes a new user to the database.
 
         :param new_username: Username to be written.
-        :param new_password_hash: Password hash to be written.
+        :param new_pw_hash: Password hash to be written.
         """
         user_db = self.__read_db()
         new_user = {"username": new_username, "pw_hash": new_pw_hash}

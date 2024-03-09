@@ -3,11 +3,11 @@ import threading
 import time
 from typing import List
 from terminal_out import Output
-from db import User_DB
+from db import UserDB
 
 
-class Server():
-    def __init__(self, output_obj: Output, db_obj: User_DB) -> None:
+class Server:
+    def __init__(self, output_obj: Output, db_obj: UserDB) -> None:
         self.__out = output_obj
         self.__db = db_obj
 
@@ -21,16 +21,21 @@ class Server():
         db = self.__db
 
         while True:
-            # get operation and user credentials from client
-            received_user_data: str = client_socket.recv(1024).decode("utf-8")
+            try:
+                # get operation and user credentials from client
+                received_user_data: str = client_socket.recv(1024).decode("utf-8")
+                print(received_user_data)
+                # split user data into its components
+                user_data_components = received_user_data.split("\n")
+                user_operation = user_data_components[0]
+                username = user_data_components[1]
+                pw_hash = user_data_components[2]
+            # in case the client disconnects, stop authentication process
+            except IndexError:
+                username = None
+                break
 
-            # split user data into its components
-            user_data_components = received_user_data.split(":")
-            user_operation = user_data_components[0]
-            username = user_data_components[1]
-            pw_hash = user_data_components[2]
-
-            # do register if client requested so
+            # do registration if client requested so
             if user_operation == "register":
                 # if user doesn't already exist in the db
                 if not db.user_exists(username):
@@ -39,10 +44,10 @@ class Server():
                     client_socket.send("OK".encode("utf-8"))
                     break
 
-            # do login if client requested so
+            # do log-in if client requested so
             if user_operation == "login":
                 # if user has requested login with correct username and password hash
-                if db.check_credentials(username, pw_hash) == True:
+                if db.check_credentials(username, pw_hash):
                     self.__out.printout(f'"{username}" logged in')
                     client_socket.send("OK".encode("utf-8"))
                     break
@@ -52,8 +57,9 @@ class Server():
 
         return username
 
-    # TODO: Send username & message in one go
-    def __broadcast_helper(self, msg: str, sender_socket: socket.socket, clients: List[socket.socket]) -> None:
+    # TODO: Send username & message in one go (maybe)
+    @staticmethod
+    def __broadcast_helper(msg: str, sender_socket: socket.socket, clients: List[socket.socket], username: str) -> None:
         """
         Broadcasts messages to every other connected client.
 
@@ -64,20 +70,28 @@ class Server():
         # broadcast to all other clients
         for cs in clients:
             # if client is not the client that sent the message
-            if cs != sender_socket:
-                cs.send(username.encode("utf-8"))
-                time.sleep(0.1)
-                cs.send(f"{msg}".encode("utf-8"))
-                time.sleep(0.1)
+            try:
+                if cs != sender_socket:
+                    cs.send(username.encode("utf-8"))
+                    time.sleep(0.1)
+                    cs.send(f"{msg}".encode("utf-8"))
+                    time.sleep(0.1)
+            # in case the client disconnects, raise ConnectionResetError
+            except BrokenPipeError:
+                raise ConnectionResetError
 
     def __handle_client(self, client_socket: socket.socket, clients: list) -> None:
         """
-        Handles every connected client seperately.
+        Handles every connected client separately.
 
         param: client_socket: The connected client socket.
         param: clients: The list containing all connected client sockets.
         """
         username = self.__auth_client(client_socket)
+        if username is None:
+            clients.remove(client_socket)
+            return
+
         self.__out.printout(f"Successfully authenticated {username}.")
 
         while True:
@@ -92,7 +106,7 @@ class Server():
                 self.__out.printout(f"Message received, sending to {len(clients) - 1} clients")
 
                 # broadcast message to all other clients
-                self.__broadcast_helper(msg, sender_socket=client_socket, clients=clients)
+                self.__broadcast_helper(msg, sender_socket=client_socket, clients=clients, username=username)
 
             # if client resets connection, break
             except ConnectionResetError:
@@ -123,7 +137,8 @@ class Server():
         # start the client handler thread
         client_handler.start()
 
-    def __connect(self, port: int, max_connections: int) -> socket.socket:
+    @staticmethod
+    def __connect(port: int, max_connections: int) -> socket.socket:
         """
         Create a new server socket and configure it to listen for incoming client connections.
 
@@ -131,18 +146,18 @@ class Server():
         :param max_connections: The maximum number of concurrent client connections the server is allowed to handle.
         :return: A connected server socket.
         """
-        # create a new socket object using IPv4 and TCP
+        # create a new socket object that uses IPv4 and TCP
         s_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+
         # allow reuse of the address in case the connection is closed unexpectedly
         s_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        
+
         # bind the listener to specified port on all available network interfaces
         s_sock.bind(("0.0.0.0", port))
-        
+
         # start listening for incoming connections, set maximum allowed connections
         s_sock.listen(max_connections)
-        
+
         return s_sock
 
     def start(self, port: int, max_connections: int) -> None:
