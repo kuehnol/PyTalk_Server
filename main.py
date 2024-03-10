@@ -1,5 +1,5 @@
-from server import Server
 from db import UserDB
+from server import Server
 from terminal_out import Output
 
 # config, set desired to your needs

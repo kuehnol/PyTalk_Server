@@ -1,9 +1,10 @@
+import json
 import socket
 import threading
-import time
 from typing import List
-from terminal_out import Output
+
 from db import UserDB
+from terminal_out import Output
 
 
 class Server:
@@ -23,13 +24,12 @@ class Server:
         while True:
             try:
                 # get operation and user credentials from client
-                received_user_data: str = client_socket.recv(1024).decode("utf-8")
+                received_credentials_json = client_socket.recv(1024).decode("utf-8")
+                received_credentials = json.loads(received_credentials_json)
 
-                # split user data into its components
-                user_data_components = received_user_data.split("\n")
-                user_operation = user_data_components[0]
-                username = user_data_components[1]
-                pw_hash = user_data_components[2]
+                user_operation = received_credentials["operation"]
+                username = received_credentials["username"]
+                pw_hash = received_credentials["pw_hash"]
             # in case the client disconnects, stop authentication process
             except IndexError:
                 username = None
@@ -70,11 +70,14 @@ class Server:
         for cs in clients:
             # if client is not the client that sent the message
             try:
+                # add username and message to dictionary and convert to json
+                message_contents = {"username": username, "message": msg}
+                message_contents_json = json.dumps(message_contents)
+
+                # send json over the network
                 if cs != sender_socket:
-                    cs.send(username.encode("utf-8"))
-                    time.sleep(0.1)
-                    cs.send(f"{msg}".encode("utf-8"))
-                    time.sleep(0.1)
+                    cs.send(message_contents_json.encode("utf-8"))
+
             # in case the client disconnects, raise ConnectionResetError
             except BrokenPipeError:
                 raise ConnectionResetError
