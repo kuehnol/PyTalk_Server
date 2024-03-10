@@ -24,7 +24,7 @@ class Server:
             try:
                 # get operation and user credentials from client
                 received_user_data: str = client_socket.recv(1024).decode("utf-8")
-                print(received_user_data)
+
                 # split user data into its components
                 user_data_components = received_user_data.split("\n")
                 user_operation = user_data_components[0]
@@ -57,7 +57,6 @@ class Server:
 
         return username
 
-    # TODO: Send username & message in one go (maybe)
     @staticmethod
     def __broadcast_helper(msg: str, sender_socket: socket.socket, clients: List[socket.socket], username: str) -> None:
         """

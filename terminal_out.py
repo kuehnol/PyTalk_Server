@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class Output:  # TODO: replace with logging or sth
+class Output:
     @staticmethod
     def printout(text: str) -> None:
         # get current time
