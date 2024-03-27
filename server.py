@@ -1,6 +1,7 @@
 import json
 import socket
 import threading
+from json import JSONDecodeError
 from typing import List
 
 from db import UserDB
@@ -25,11 +26,17 @@ class Server:
             try:
                 # get operation and user credentials from client
                 received_credentials_json = client_socket.recv(1024).decode("utf-8")
-                received_credentials = json.loads(received_credentials_json)
+
+                try:
+                    received_credentials = json.loads(received_credentials_json)
+                except JSONDecodeError:
+                    username = None
+                    break
 
                 user_operation = received_credentials["operation"]
                 username = received_credentials["username"]
                 pw_hash = received_credentials["pw_hash"]
+
             # in case the client disconnects, stop authentication process
             except IndexError:
                 username = None
@@ -89,7 +96,9 @@ class Server:
         param: client_socket: The connected client socket.
         param: clients: The list containing all connected client sockets.
         """
+
         username = self.__auth_client(client_socket)
+
         if username is None:
             clients.remove(client_socket)
             return
